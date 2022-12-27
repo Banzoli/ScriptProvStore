@@ -4,11 +4,17 @@ import javax.naming.AuthenticationException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserStore {
+
+    private List<String> ustore;
     DirContext connection;
 
-    public void  newConnection(){
+    public void  newConnection() throws NamingException {
+
+        this.setUstore(new ArrayList<String>());
 
         // Connection info
         var env = new java.util.Hashtable(11);
@@ -28,9 +34,6 @@ public class UserStore {
         catch (NamingException e) {
             e.printStackTrace();
         }
-    }
-
-    public void getAllUsers() throws NamingException {
 
         String searchFilter = "(objectClass=eTGlobalUser)";
         String[] reqAtt = {"eTFullName"};
@@ -45,14 +48,24 @@ public class UserStore {
         {
             result = (SearchResult) users.next();
             Attributes attr = result.getAttributes();
-            System.out.println(attr.get("eTFullName"));
+            if (attr.get("eTFullName") != null){
+                var dasdsa = attr.get("eTFullName").toString().replace("eTFullName: ","");
+                ustore.add(dasdsa);
+            }
         }
+
+    }
+
+    public List<String> getUstore() {
+        return ustore;
+    }
+
+    public void setUstore(List<String> ustore) {
+        this.ustore = ustore;
     }
     public static void main(String[] args) throws NamingException {
 
         UserStore app = new UserStore();
         app.newConnection();
-        app.getAllUsers();
-
     }
 }

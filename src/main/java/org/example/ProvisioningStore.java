@@ -1,28 +1,34 @@
 package org.example;
 
 import javax.naming.AuthenticationException;
+import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
 
 public class ProvisioningStore {
-
-
     DirContext connection;
 
-    public void  newConnection(){
+    private List<String> pstore;
+
+    public void  newConnection() throws NamingException {
+
+        this.setPstore(new ArrayList<String>());
 
         // Connection info
-        var env = new java.util.Hashtable(11);
-        env.put(javax.naming.Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(javax.naming.Context.PROVIDER_URL, "ldap://192.168.153.130:10101");
-        env.put(javax.naming.Context.SECURITY_PRINCIPAL, "cn=dsaadmin,ou=im,ou=ca,o=com");
-        env.put(javax.naming.Context.SECURITY_CREDENTIALS, "Abc@123");
+        var env = new Hashtable(11);
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        env.put(Context.PROVIDER_URL, "ldap://192.168.153.130:10101");
+        env.put(Context.SECURITY_PRINCIPAL, "cn=dsaadmin,ou=im,ou=ca,o=com");
+        env.put(Context.SECURITY_CREDENTIALS, "Abc@123");
 
         try {
             connection = new InitialDirContext(env);
-            System.out.println("Hello world!" + connection);
+            System.out.println(connection);
         }
         catch (AuthenticationException ex)
         {
@@ -31,9 +37,6 @@ public class ProvisioningStore {
         catch (NamingException e) {
             e.printStackTrace();
         }
-    }
-
-    public void getAllUsers() throws NamingException {
 
         String searchFilter = "(objectClass=inetOrgPerson)";
         String[] reqAtt = {"cn"};
@@ -48,14 +51,23 @@ public class ProvisioningStore {
         {
             result = (SearchResult) users.next();
             Attributes attr = result.getAttributes();
-            System.out.println(attr.get("cn"));
+            var dasdsa = attr.get("cn").toString().replace("cn: ","");
+            pstore.add(dasdsa);
         }
     }
+
+    public List<String> getPstore() {
+        return pstore;
+    }
+
+    public void setPstore(List<String> pstore) {
+        this.pstore = pstore;
+    }
+
     public static void main(String[] args) throws NamingException {
 
         ProvisioningStore app = new ProvisioningStore();
         app.newConnection();
-        app.getAllUsers();
 
     }
 }
